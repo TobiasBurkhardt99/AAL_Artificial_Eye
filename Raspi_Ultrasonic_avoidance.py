@@ -10,18 +10,18 @@ TRIG_LEFT = 24
 ECHO_LEFT = 23
 TRIG_RIGHT = 27
 ECHO_RIGHT = 22
-#TRIG_MID = 5
-#ECHO_MID = 6
+TRIG_MID = 5
+ECHO_MID = 6
 distance_start_beeping = 1200
 distance_stop = 300
 
-Set up GPIO direction (IN / OUT)
+#Set up GPIO direction (IN / OUT)
 GPIO.setup(TRIG_LEFT, GPIO.OUT)
 GPIO.setup(ECHO_LEFT, GPIO.IN)
 GPIO.setup(TRIG_RIGHT, GPIO.OUT)
 GPIO.setup(ECHO_RIGHT, GPIO.IN)
-#GPIO.setup(TRIG_MID, GPIO.OUT)
-#GPIO.setup(ECHO_MID, GPIO.IN)
+GPIO.setup(TRIG_MID, GPIO.OUT)
+GPIO.setup(ECHO_MID, GPIO.IN)
 
 def get_distance(trig, echo):
     # Set the trigger to High
