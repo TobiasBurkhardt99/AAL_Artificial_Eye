@@ -164,4 +164,4 @@ try:
 
 except KeyboardInterrupt:
     print("Measurement stopped by user")
-    #GPIO.cleanup()
+    GPIO.cleanup()
