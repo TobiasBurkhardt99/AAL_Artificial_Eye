@@ -1,0 +1,98 @@
+// Define sound speed in cm/uS
+#define SOUND_SPEED 0.034
+
+// Define your pins
+const int buttonPin = 15;
+const int buzzerPin = 4;
+const int TRIG_PIN_L = 5;
+const int ECHO_PIN_L = 18;
+
+const int TRIG_PIN_R = 33;
+const int ECHO_PIN_R = 32;
+
+const int TRIG_PIN_M = 22;
+const int ECHO_PIN_M = 23;
+
+// Function to read distance from sensor
+float readDistance(int trigPin, int echoPin) {
+  long duration;
+  float distanceCm;
+
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate the distance
+  distanceCm = duration * SOUND_SPEED / 2;
+
+  return distanceCm;
+}
+
+void playBeep(int duration, int frequency) {
+  tone(buzzerPin, frequency);  // Generate tone at specified frequency
+  delay(duration);             // Wait for the specified duration
+  noTone(buzzerPin);           // Stop the tone
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(TRIG_PIN_L, OUTPUT);
+  pinMode(ECHO_PIN_L, INPUT);
+  pinMode(TRIG_PIN_R, OUTPUT);
+  pinMode(ECHO_PIN_R, INPUT);
+  pinMode(TRIG_PIN_M, OUTPUT);
+  pinMode(ECHO_PIN_M, INPUT);
+}
+
+bool isBeeping = false; // Variable to track the state of beeping
+
+void loop() {
+  static unsigned long lastDebounceTime = 0;  // Timestamp of the last button press
+  static bool lastButtonState = HIGH;         // Previous button state
+  bool buttonState = digitalRead(buttonPin);  // Current button state
+  unsigned long currentTime = millis();       // Current time
+
+  // Check if the button is pressed and it's been more than 50ms since the last press
+  if (buttonState != lastButtonState && currentTime - lastDebounceTime > 50) {
+    // Button has been pressed, update debounce time
+    lastDebounceTime = currentTime;
+
+    // If the button is pressed, toggle the beep state
+    if (buttonState == LOW) {
+      isBeeping = !isBeeping;
+
+      // Print a message indicating the button press
+      Serial.println("Button pressed!");
+    }
+  }
+
+  // Update the last button state
+  lastButtonState = buttonState;
+
+  // Check if we're in the beeping state
+  if (isBeeping) {
+    // Read distance from sensor
+    float distance_L = readDistance(TRIG_PIN_L, ECHO_PIN_L);
+    float distance_R = readDistance(TRIG_PIN_R, ECHO_PIN_R);
+    float distance_M = readDistance(TRIG_PIN_M, ECHO_PIN_M);
+
+    // Calculate the minimum distance
+    float min_distance = min(min(distance_L, distance_R), distance_M);
+
+    // Calculate the delay duration based on the distance
+    int delay_duration = 100 + 500 * min_distance / 100; // Adjust scaling factor as needed
+
+    // Play beep
+    playBeep(50, 440);
+    delay(delay_duration);
+  }
+}
